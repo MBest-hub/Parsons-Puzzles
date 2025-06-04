@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Loop - Parsons Puzzle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fafafa;
+      margin: 20px;
+    }
+    .puzzle-container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    #code-lines {
+      margin: 20px 0;
+      padding: 0;
+      list-style: none;
+    }
+    .code-line {
+      background: #f4f4f4;
+      border: 1px solid #ccc;
+      padding: 8px;
+      margin-bottom: 5px;
+      cursor: move;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="puzzle-container">
+    <h2>Simple Loop</h2>
+    <p>Arrange the code to print the numbers 0 to 3.</p>
+    <ul id="code-lines">
+      <!-- The lines are deliberately out-of-order if you want to add shuffling here -->
+      <li class="code-line" draggable="true">for i in range(0, 4):</li>
+      <li class="code-line" draggable="true">print(i)</li>
+    </ul>
+    <button onclick="checkOrder()">Check Order</button>
+    <p id="result"></p>
+  </div>
+
+  <script>
+    // Simple drag and drop functionality.
+    const codeLines = document.querySelectorAll('.code-line');
+    let dragSrcEl = null;
+
+    function handleDragStart(e) {
+      dragSrcEl = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.outerHTML);
+      this.classList.add('dragElem');
+    }
+
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      this.classList.add('over');
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function handleDragEnter(e) {
+      // this.classList.add('over');
+    }
+
+    function handleDragLeave(e) {
+      this.classList.remove('over');
+    }
+
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      if (dragSrcEl !== this) {
+        this.parentNode.removeChild(dragSrcEl);
+        let dropHTML = e.dataTransfer.getData('text/html');
+        this.insertAdjacentHTML('beforebegin', dropHTML);
+        const dropElem = this.previousSibling;
+        addDnDHandlers(dropElem);
+      }
+      this.classList.remove('over');
+      return false;
+    }
+
+    function handleDragEnd(e) {
+      codeLines.forEach(function (line) {
+        line.classList.remove('over');
+        line.classList.remove('dragElem');
+      });
+    }
+
+    function addDnDHandlers(elem) {
+      elem.addEventListener('dragstart', handleDragStart, false);
+      elem.addEventListener('dragenter', handleDragEnter, false);
+      elem.addEventListener('dragover', handleDragOver, false);
+      elem.addEventListener('dragleave', handleDragLeave, false);
+      elem.addEventListener('drop', handleDrop, false);
+      elem.addEventListener('dragend', handleDragEnd, false);
+    }
+
+    document.querySelectorAll('#code-lines .code-line').forEach(addDnDHandlers);
+
+    // Check the order of code lines.
+    function checkOrder() {
+      const ul = document.getElementById('code-lines');
+      const lines = ul.getElementsByTagName('li');
+      const currentOrder = [];
+      for (let i = 0; i < lines.length; i++) {
+        currentOrder.push(lines[i].textContent.trim());
+      }
+      // The correct order is as follows:
+      const correctOrder = [
+        "for i in range(0, 4):",
+        "print(i)"
+      ];
+      const resultDisplay = document.getElementById('result');
+      if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
+        resultDisplay.textContent = "Correct! Well done.";
+        resultDisplay.style.color = "green";
+      } else {
+        resultDisplay.textContent = "Incorrect. Please try again.";
+        resultDisplay.style.color = "red";
+      }
+    }
+  </script>
+</body>
+</html>
